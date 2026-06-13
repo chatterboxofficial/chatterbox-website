@@ -1,148 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ChatterBox AI Chat</title>
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+async function sendMessage() {
 
-body{
-background:#0f172a;
-height:100vh;
-display:flex;
-flex-direction:column;
-}
+let input = document.getElementById("userInput");
+let text = input.value.trim();
 
-.header{
-background:#111827;
-color:white;
-padding:15px;
-font-size:22px;
-font-weight:bold;
-text-align:center;
-border-bottom:1px solid #1f2937;
-}
+if(text === "") return;
 
-.chat-box{
-flex:1;
-overflow-y:auto;
-padding:20px;
-display:flex;
-flex-direction:column;
-gap:15px;
-}
+let chat = document.getElementById("chatBox");
 
-.message{
-max-width:80%;
-padding:12px 16px;
-border-radius:15px;
-line-height:1.5;
-}
-
-.user{
-background:#2563eb;
-color:white;
-align-self:flex-end;
-}
-
-.bot{
-background:#1f2937;
-color:white;
-align-self:flex-start;
-}
-
-.input-area{
-display:flex;
-padding:15px;
-background:#111827;
-border-top:1px solid #1f2937;
-}
-
-input{
-flex:1;
-padding:12px;
-border:none;
-outline:none;
-border-radius:10px;
-background:#1f2937;
-color:white;
-}
-
-button{
-margin-left:10px;
-padding:12px 20px;
-border:none;
-border-radius:10px;
-background:#2563eb;
-color:white;
-cursor:pointer;
-}
-
-.credit{
-position:fixed;
-bottom:10px;
-right:15px;
-font-size:12px;
-color:#888;
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">
-🤖 ChatterBox AI
-</div>
-
-<div class="chat-box" id="chatBox">
-<div class="message bot">
-Hello! I am ChatterBox AI. How can I help you today?
-</div>
-</div>
-
-<div class="input-area">
-<input type="text" id="userInput" placeholder="Type your message...">
-<button onclick="sendMessage()">Send</button>
-</div>
-
-<div class="credit">
-✨ AI Crafted by Aniket
-</div>
-
-<script>
-function sendMessage(){
-
-let input=document.getElementById("userInput");
-let text=input.value.trim();
-
-if(text==="") return;
-
-let chat=document.getElementById("chatBox");
-
-chat.innerHTML+=`
+chat.innerHTML += `
 <div class="message user">${text}</div>
 `;
 
-setTimeout(()=>{
-chat.innerHTML+=`
+input.value = "";
+
+try {
+
+const response = await fetch("/chat", {
+method: "POST",
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify({
+message: text
+})
+});
+
+const data = await response.json();
+
+chat.innerHTML += `
+<div class="message bot">${data.reply}</div>
+`;
+
+chat.scrollTop = chat.scrollHeight;
+
+} catch(err) {
+
+chat.innerHTML += `
 <div class="message bot">
-You said: ${text}
+Error connecting to AI
 </div>
 `;
-chat.scrollTop=chat.scrollHeight;
-},500);
 
-input.value="";
-chat.scrollTop=chat.scrollHeight;
 }
-</script>
-
-</body>
-</html>
+}
