@@ -1,46 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChatterBox AI</title>
 
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#chatBox {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.message {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 10px;
+    max-width: 80%;
+}
+
+.user {
+    background: #3b82f6;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.bot {
+    background: #334155;
+}
+
+.inputBox {
+    display: flex;
+    padding: 10px;
+    background: #111827;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+}
+
+button {
+    margin-left: 10px;
+    padding: 10px 15px;
+    border: none;
+    background: #22c55e;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="chatBox"></div>
+
+<div class="inputBox">
+<input id="userInput" type="text" placeholder="Type message...">
+<button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
 async function sendMessage() {
 
-let input = document.getElementById("userInput");
-let text = input.value.trim();
+    let input = document.getElementById("userInput");
+    let text = input.value.trim();
 
-if(text === "") return;
+    if(text === "") return;
 
-let chat = document.getElementById("chatBox");
+    let chat = document.getElementById("chatBox");
 
-chat.innerHTML += `
-<div class="message user">${text}</div>
-`;
+    chat.innerHTML += `<div class="message user">${text}</div>`;
 
-input.value = "";
+    input.value = "";
 
-try {
+    try {
 
-const response = await fetch("/chat", {
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
-body: JSON.stringify({
-message: text
-})
-});
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: text })
+        });
 
-const data = await response.json();
+        const data = await response.json();
 
-chat.innerHTML += `
-<div class="message bot">${data.reply}</div>
-`;
+        chat.innerHTML += `<div class="message bot">${data.reply}</div>`;
+        chat.scrollTop = chat.scrollHeight;
 
-chat.scrollTop = chat.scrollHeight;
-
-} catch(err) {
-
-chat.innerHTML += `
-<div class="message bot">
-Error connecting to AI
-</div>
-`;
-
+    } catch(err) {
+        chat.innerHTML += `<div class="message bot">Error connecting to AI</div>`;
+    }
 }
-}
+</script>
+
+</body>
+</html>
