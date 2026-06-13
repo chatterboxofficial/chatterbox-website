@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,127 +7,165 @@
 
 <style>
 body{
-background:#07152b;
-font-family:Arial,sans-serif;
 margin:0;
+font-family:Arial;
+background: radial-gradient(circle at top,#0b1220,#05070f);
 color:white;
+display:flex;
+justify-content:center;
+height:100vh;
 }
 
-.chat-container{
-max-width:800px;
-margin:auto;
-padding:20px;
+.app{
+width:100%;
+max-width:900px;
+display:flex;
+flex-direction:column;
+height:100vh;
 }
 
-h1{
+.header{
 text-align:center;
+padding:15px;
+font-size:22px;
+font-weight:bold;
+letter-spacing:1px;
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(10px);
 }
 
 #chatBox{
-height:70vh;
+flex:1;
 overflow-y:auto;
-border:1px solid #333;
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
+padding:15px;
+display:flex;
+flex-direction:column;
+gap:10px;
 }
 
-.message{
-padding:10px;
-margin:10px 0;
-border-radius:10px;
+.msg{
+max-width:75%;
+padding:12px 15px;
+border-radius:15px;
+animation: pop 0.2s ease;
+white-space:pre-wrap;
+}
+
+@keyframes pop{
+from{transform:scale(0.9);opacity:0;}
+to{transform:scale(1);opacity:1;}
 }
 
 .user{
-background:#0066ff;
-text-align:right;
+background: linear-gradient(135deg,#3b82f6,#2563eb);
+align-self:flex-end;
+border-bottom-right-radius:0;
 }
 
 .bot{
-background:#222;
+background: rgba(255,255,255,0.08);
+align-self:flex-start;
+border-bottom-left-radius:0;
 }
 
-.input-area{
+.inputArea{
 display:flex;
+padding:10px;
 gap:10px;
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(10px);
 }
 
 input{
 flex:1;
 padding:12px;
 border:none;
-border-radius:8px;
+border-radius:10px;
+outline:none;
+background:#111827;
+color:white;
 }
 
 button{
-padding:12px 20px;
+padding:12px 18px;
 border:none;
-background:#0066ff;
+border-radius:10px;
+background:linear-gradient(135deg,#22c55e,#16a34a);
 color:white;
-border-radius:8px;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:active{
+transform:scale(0.95);
 }
 </style>
 </head>
 
 <body>
 
-<div class="chat-container">
+<div class="app">
 
-<h1>ChatterBox AI</h1>
+<div class="header">🤖 ChatterBox AI</div>
 
 <div id="chatBox"></div>
 
-<div class="input-area">
-<input id="userInput" placeholder="Type message...">
+<div class="inputArea">
+<input id="userInput" placeholder="Ask something..." />
 <button onclick="sendMessage()">Send</button>
 </div>
 
 </div>
 
 <script>
-async function sendMessage() {
+async function sendMessage(){
 
-let input = document.getElementById("userInput");
-let text = input.value.trim();
+let input=document.getElementById("userInput");
+let text=input.value.trim();
+if(text==="") return;
 
-if(text === "") return;
+let chat=document.getElementById("chatBox");
 
-let chat = document.getElementById("chatBox");
+// USER MESSAGE
+let userMsg=document.createElement("div");
+userMsg.className="msg user";
+userMsg.innerText=text;
+chat.appendChild(userMsg);
 
-chat.innerHTML += `
-<div class="message user">${text}</div>
-`;
+input.value="";
 
-input.value = "";
+// BOT LOADING
+let botMsg=document.createElement("div");
+botMsg.className="msg bot";
+botMsg.innerText="thinking...";
+chat.appendChild(botMsg);
 
-try {
+chat.scrollTop=chat.scrollHeight;
 
-const response = await fetch("/chat", {
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
-body: JSON.stringify({
-message: text
-})
+try{
+
+const res=await fetch("/chat",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message:text})
 });
 
-const data = await response.json();
+const data=await res.json();
 
-chat.innerHTML += `
-<div class="message bot">${data.reply}</div>
-`;
+// typing effect
+let reply=data.reply;
+botMsg.innerText="";
 
-chat.scrollTop = chat.scrollHeight;
+let i=0;
+let interval=setInterval(()=>{
+botMsg.innerText+=reply[i];
+i++;
+chat.scrollTop=chat.scrollHeight;
+if(i>=reply.length) clearInterval(interval);
+},15);
 
-} catch(err) {
-
-chat.innerHTML += `
-<div class="message bot">
-Error connecting to AI
-</div>
-`;
-
+}catch(err){
+botMsg.innerText="⚠ Server connection failed";
 }
 
 }
