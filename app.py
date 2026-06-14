@@ -1,14 +1,14 @@
 
+import os
+import requests
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import google.generativeai as genai
-import os
 
 app = Flask(__name__)
 CORS(app)
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-2.5-flash")
+# Groq API Configuration
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 @app.route("/")
 def home():
@@ -20,20 +20,29 @@ def chat_page():
 
 @app.route("/chat", methods=["POST"])
 def chat():
+    data = request.json
+    user_message = data.get("message", "")
+    
+    # Groq API call
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": "You are Chatterbox AI, a helpful personal assistant. If asked your name, you are Chatterbox AI."},
+            {"role": "user", "content": user_message}
+        ]
+    }
+    
     try:
-        data = request.json
-        msg = data.get("message", "")
-
-        response = model.generate_content(msg)
-
-        return jsonify({
-            "reply": response.text
-        })
-
+        response = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload)
+        res_data = response.json()
+        ai_reply = res_data["choices"][0]["message"]["content"]
+        return jsonify({"reply": ai_reply})
     except Exception as e:
-        return jsonify({
-            "reply": f"Error: {str(e)}"
-        })
+        return jsonify({"reply": f"Error: {str(e)}"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
