@@ -4,36 +4,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatterbox AI | Dashboard</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Chatterbox AI</title>
     <style>
         body { margin: 0; display: flex; height: 100vh; background: #020617; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        /* Sidebar Styling */
-        .sidebar { width: 260px; background: #0f172a; padding: 20px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; gap: 20px; }
-        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 18px; }
-        .logo-area img { width: 45px; border-radius: 50%; border: 2px solid #3b82f6; }
-        .menu-item { color: #94a3b8; cursor: pointer; padding: 10px; transition: 0.3s; border-radius: 8px; }
-        .menu-item:hover { background: #1e293b; color: white; }
-        /* Chat Area */
-        .main { flex: 1; display: flex; flex-direction: column; }
-        #chat-window { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
-        .msg { padding: 15px 20px; border-radius: 15px; max-width: 70%; backdrop-filter: blur(10px); }
+        /* Sidebar */
+        #sidebar { width: 260px; background: #0f172a; padding: 20px; transition: 0.3s; display: flex; flex-direction: column; border-right: 1px solid #1e293b; }
+        .hidden { margin-left: -260px; }
+        .logo-img { width: 40px; border-radius: 50%; margin-bottom: 20px; }
+        
+        /* Main Chat */
+        .main { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .header { padding: 15px; display: flex; align-items: center; gap: 15px; background: #020617; }
+        #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .msg { padding: 12px 18px; border-radius: 15px; max-width: 85%; }
         .user { align-self: flex-end; background: #2563eb; }
         .ai { align-self: flex-start; background: #1e293b; border: 1px solid #334155; }
-        .input-area { padding: 20px; background: #020617; display: flex; justify-content: center; }
-        input { width: 70%; padding: 15px; border-radius: 12px; background: #1e293b; border: 1px solid #475569; color: white; outline: none; }
-        button { padding: 0 20px; margin-left: 10px; background: #3b82f6; border: none; border-radius: 12px; color: white; cursor: pointer; }
+        .input-area { padding: 15px; display: flex; gap: 10px; border-top: 1px solid #1e293b; }
+        input { flex: 1; padding: 12px; border-radius: 8px; background: #1e293b; border: 1px solid #334155; color: white; }
+        button { padding: 10px 20px; background: #2563eb; border-radius: 8px; border: none; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo-area">
-            <img src="logo.png" alt="Logo"> Chatterbox AI
-        </div>
-        <div class="menu-item"><i class="fa fa-plus"></i> New Chat</div>
-        <div class="menu-item"><i class="fa fa-history"></i> History</div>
+    <div id="sidebar">
+        <img src="logo.png" class="logo-img">
+        <div style="cursor: pointer;" onclick="location.reload()">+ New Chat</div>
     </div>
     <div class="main">
+        <div class="header">
+            <button onclick="document.getElementById('sidebar').classList.toggle('hidden')">☰</button>
+            <span>Chatterbox AI</span>
+        </div>
         <div id="chat-window"></div>
         <div class="input-area">
             <input type="text" id="userInput" placeholder="Ask Chatterbox anything...">
@@ -48,6 +48,7 @@
             if(!input.value) return;
             chat.innerHTML += `<div class="msg user">${input.value}</div>`;
             let msg = input.value; input.value = '';
+            
             let res = await fetch('/chat', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ message: msg, name: userName })
