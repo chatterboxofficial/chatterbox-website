@@ -1,141 +1,89 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta }
-
-input{
-flex:1;
-padding:16px;
-border:none;
-outline:none;
-border-radius:30px;
-background:#1e293b;
-color:white;
-}
-
-.send-btn{
-padding:16px 24px;
-border:none;
-border-radius:30px;
-background:#22c55e;
-color:white;
-font-weight:bold;
-cursor:pointer;
-}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatterbox AI V4 Ultra Premium</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:linear-gradient(135deg,#081120,#0f172a,#111827);color:#fff;height:100vh;overflow:hidden}
+.sidebar{position:fixed;left:-280px;top:0;width:270px;height:100%;background:#0f172a;padding:20px;transition:.35s;z-index:9999;border-right:1px solid #1f2937}
+.sidebar.active{left:0}
+.menu-btn{position:fixed;top:12px;left:12px;width:48px;height:48px;border:none;border-radius:12px;background:#1e293b;color:#fff;font-size:22px;z-index:10000}
+.chat-window{height:calc(100vh - 110px);overflow:auto;padding:20px 20px 140px}
+.hero{text-align:center;margin-top:8vh}
+.logo{width:130px;height:130px;border-radius:50%;box-shadow:0 0 50px rgba(34,211,238,.5)}
+.hero h1{font-size:48px;margin-top:18px}
+.hero p{color:#94a3b8;margin-top:8px}
+.status{display:inline-block;margin-top:15px;padding:8px 14px;border-radius:999px;background:#10253b}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-right:8px}
+.message{display:flex;margin:14px 0}
+.user{justify-content:flex-end}
+.ai{justify-content:flex-start}
+.bubble{max-width:78%;padding:16px;border-radius:22px}
+.user .bubble{background:#2563eb}
+.ai .bubble{background:#1e293b;display:flex;gap:10px}
+.ai-logo{width:34px;height:34px;border-radius:50%}
+.input-wrap{position:fixed;bottom:0;width:100%;padding:16px}
+.input-box{max-width:950px;margin:auto;background:#111827;display:flex;align-items:center;gap:10px;padding:12px;border-radius:30px}
+input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:16px}
+.mic,.send{width:42px;height:42px;border:none;border-radius:50%;color:#fff}
+.mic{background:#2b3447}
+.send{background:#2563eb}
+.typing{display:none;color:#94a3b8;padding:10px}
+.credit{text-align:center;color:#6b7280;margin-top:25px}
 </style>
-
 </head>
-
 <body>
-
 <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-
 <div class="sidebar" id="sidebar">
-<h2>Chatterbox AI</h2>
-<br>
-<p>Think • Create • Explore</p>
-</div>
-
-<div class="header">
-<img src="/logo.png">
-<h2>Chatterbox AI</h2>
+<h2>Chatterbox AI</h2><br>
+<p>Think • Create • Explore</p><br>
+<p>Ultra Premium V4</p>
 </div>
 
 <div class="chat-window" id="chat-window">
-
-<div class="welcome" id="welcome">
-<img src="/logo.png">
+<div class="hero" id="welcome">
+<img src="/logo.png" class="logo">
 <h1>Chatterbox AI</h1>
+<div class="status"><span class="dot"></span>Online</div>
+<p>Your Intelligent AI Companion</p>
 <p>Think • Create • Explore</p>
-<br>
-<p>Feel free to ask anything.</p>
+<div class="credit">Crafted by Aniket</div>
+</div>
+<div id="typing" class="typing">● ● ● Thinking...</div>
 </div>
 
-</div>
-
-<div class="input-area">
+<div class="input-wrap">
 <div class="input-box">
 <input id="userInput" placeholder="Message Chatterbox AI...">
-<button class="send-btn" onclick="send()">Send</button>
+<button class="mic">🎤</button>
+<button class="send" onclick="send()">➜</button>
 </div>
 </div>
 
 <script>
-
-function toggleSidebar(){
-document.getElementById("sidebar").classList.toggle("active");
-}
-
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('active');}
 async function send(){
-
-let input=document.getElementById("userInput");
-
+let input=document.getElementById('userInput');
 if(!input.value.trim()) return;
-
-document.getElementById("welcome")?.remove();
-
-let chat=document.getElementById("chat-window");
-
-chat.innerHTML += `
-<div class="message user">
-<div class="bubble">${input.value}</div>
-</div>
-`;
-
-let text=input.value;
-input.value="";
-
+document.getElementById('welcome')?.remove();
+let chat=document.getElementById('chat-window');
+chat.innerHTML+=`<div class="message user"><div class="bubble">${input.value}</div></div>`;
+let text=input.value; input.value='';
+document.getElementById('typing').style.display='block';
 try{
-
-let response=await fetch("/chat",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:text
-})
-});
-
-let data=await response.json();
-
-chat.innerHTML += `
-<div class="message ai">
-<div class="bubble">
-<img src="/logo.png" class="ai-logo">
-<div>${data.reply}</div>
-</div>
-</div>
-`;
-
-chat.scrollTop=chat.scrollHeight;
-
+let r=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
+let d=await r.json();
+document.getElementById('typing').style.display='none';
+chat.innerHTML+=`<div class="message ai"><div class="bubble"><img src="/logo.png" class="ai-logo"><div>${d.reply}</div></div></div>`;
 }catch(e){
-
-chat.innerHTML += `
-<div class="message ai">
-<div class="bubble">
-<img src="/logo.png" class="ai-logo">
-<div>Connection Error</div>
-</div>
-</div>
-`;
-
+document.getElementById('typing').style.display='none';
+chat.innerHTML+=`<div class="message ai"><div class="bubble"><img src="/logo.png" class="ai-logo"><div>Connection Error</div></div></div>`;
 }
-
+chat.scrollTop=chat.scrollHeight;
 }
-
-document.getElementById("userInput")
-.addEventListener("keypress",function(e){
-if(e.key==="Enter"){
-send();
-}
-});
-
+document.getElementById('userInput').addEventListener('keypress',e=>{if(e.key==='Enter')send();});
 </script>
-
 </body>
 </html>
-
