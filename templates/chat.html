@@ -1,138 +1,75 @@
-let chat =
-document.getElementById("chat-window");
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatterbox AI</title>
+</head>
 
-/* User Message */
+<body>
 
-chat.innerHTML += `
+<h1>Chatterbox AI</h1>
 
-<div class="message user">
+<div id="chat-window"></div>
 
-<div class="bubble">
-
-${input.value}
-
+<div id="typing" style="display:none;">
+Typing...
 </div>
 
-</div>
+<input type="text" id="userInput" placeholder="Type message">
+<button onclick="send()">Send</button>
 
-`;
+<script>
+async function send() {
+
+let input = document.getElementById("userInput");
+
+if (!input.value.trim()) return;
+
+let chat = document.getElementById("chat-window");
+
+chat.innerHTML += "<p><b>You:</b> " + input.value + "</p>";
 
 let text = input.value;
-
 input.value = "";
 
-/* Typing */
+document.getElementById("typing").style.display = "block";
 
-document
-.getElementById("typing")
-.style.display = "block";
+try {
 
-try{
-
-let response =
-await fetch("/chat",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
+let response = await fetch("/chat", {
+method: "POST",
+headers: {
+"Content-Type": "application/json"
 },
-
-body:JSON.stringify({
-message:text
+body: JSON.stringify({
+message: text
 })
-
 });
 
-let data =
-await response.json();
+let data = await response.json();
 
-/* Hide Typing */
+document.getElementById("typing").style.display = "none";
 
-document
-.getElementById("typing")
-.style.display = "none";
+chat.innerHTML += "<p><b>AI:</b> " + data.reply + "</p>";
 
-/* AI Message */
+} catch(e) {
 
-chat.innerHTML += `
+document.getElementById("typing").style.display = "none";
 
-<div class="message ai">
-
-<div class="bubble">
-
-<img
-src="/logo.png"
-class="ai-logo"
->
-
-<div>
-
-${data.reply}
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-}catch(e){
-
-document
-.getElementById("typing")
-.style.display = "none";
-
-chat.innerHTML += `
-
-<div class="message ai">
-
-<div class="bubble">
-
-<img
-src="/logo.png"
-class="ai-logo"
->
-
-<div>
-
-Connection Error
-
-</div>
-
-</div>
-
-</div>
-
-`;
+chat.innerHTML += "<p><b>Connection Error</b></p>";
 
 }
 
-/* Auto Scroll */
-
-chat.scrollTop =
-chat.scrollHeight;
-
+chat.scrollTop = chat.scrollHeight;
 }
 
-/* Enter Key */
-
-document
-.getElementById("userInput")
-.addEventListener(
-"keypress",
-function(e){
-
-if(e.key === "Enter"){
-
+document.getElementById("userInput")
+.addEventListener("keypress", function(e) {
+if (e.key === "Enter") {
 send();
-
 }
-
-}
-);
-
+});
 </script>
 
 </body>
