@@ -1,0 +1,16 @@
+body{margin:0;background:linear-gradient(135deg,#07111f,#0f172a,#111827);color:#fff;font-family:Inter,Arial,sans-serif;height:100vh}
+.hero{text-align:center;padding-top:12vh}
+.logo{width:120px;height:120px;border-radius:50%;margin:auto;background:#1d4ed8;display:flex;align-items:center;justify-content:center;font-size:60px;box-shadow:0 0 50px #2563eb}
+.chat-window{height:65vh;overflow:auto;padding:20px 20px 120px}
+.msg{max-width:75%;padding:14px 18px;border-radius:18px;margin:12px 0}
+.user{margin-left:auto;background:#2563eb}
+.ai{background:#1e293b}
+.input-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;width:min(900px,92%);display:flex;gap:10px;background:rgba(17,24,39,.85);backdrop-filter:blur(18px);padding:12px;border-radius:28px}
+textarea{flex:1;background:transparent;border:none;color:#fff;outline:none;resize:none}
+.input-bar button{width:50px;border:none;border-radius:50%;background:#2563eb;color:#fff}
+.sidebar{position:fixed;left:-300px;top:0;width:280px;height:100%;background:#0b1220;padding:20px;transition:.3s}
+.sidebar.active{left:0}
+.sidebar button,.menu-btn{display:block;margin:10px 0;background:#1e293b;color:#fff;border:none;padding:10px;border-radius:10px}
+.menu-btn{position:fixed;top:15px;left:15px;z-index:99}
+.typing{display:none;padding:10px 20px;color:#94a3b8}
+.copyright{position:absolute;bottom:20px;font-size:12px;color:#94a3b8}
