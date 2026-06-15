@@ -86,4 +86,345 @@ chat.scrollTop=chat.scrollHeight;
 document.getElementById('userInput').addEventListener('keypress',e=>{if(e.key==='Enter')send();});
 </script>
 </body>
+</html><body>
+
+<!-- Menu Button -->
+
+<button class="menu-btn" onclick="toggleSidebar()">
+☰
+</button>
+
+<!-- Sidebar -->
+
+<div class="sidebar" id="sidebar">
+
+<h2>Chatterbox AI</h2>
+
+<p>➕ New Chat</p>
+
+<p>🕘 History</p>
+
+<p>⚙ Settings</p>
+
+<p>💡 Features</p>
+
+<p>ℹ About</p>
+
+<br>
+
+<hr style="border-color:#24324d">
+
+<br>
+
+<p style="font-size:13px;color:#64748b;">
+Version V5 Ultra Premium
+</p>
+
+</div>
+
+<!-- Hero Screen -->
+
+<div class="hero" id="hero">
+
+<img src="/logo.png" class="logo">
+
+<h1 class="hero-title">
+Chatterbox AI
+</h1>
+
+<p class="hero-sub">
+Professional AI Assistant
+</p>
+
+<div class="status">
+<span class="dot"></span>
+Online & Ready
+</div>
+
+<br>
+
+<p style="color:#94a3b8;">
+Think • Create • Explore
+</p>
+
+</div>
+
+<!-- Chat Window -->
+
+<div class="chat-window" id="chat-window">
+
+<div id="typing"
+style="
+display:none;
+padding:10px;
+color:#94a3b8;
+font-size:14px;
+">
+● ● ● Thinking...
+</div>
+
+</div>
+
+<!-- Floating Input -->
+
+<div class="input-wrap">
+
+<div class="input-box">
+
+<input
+id="userInput"
+placeholder="Message Chatterbox AI..."
+autocomplete="off"
+
+>
+
+<!-- Mic Button -->
+
+<button
+class="mic"
+onclick="startVoice()"
+title="Voice Input"
+
+>
+
+🎙 </button>
+
+<!-- Send Button -->
+
+<button
+class="send"
+onclick="send()"
+title="Send"
+
+>
+
+➜ </button>
+
+</div>
+
+</div>
+
+<!-- Footer -->
+
+<div
+style="
+position:fixed;
+right:12px;
+bottom:4px;
+font-size:11px;
+color:#6b7280;
+">
+
+Crafted by Aniket • © 2026 All Rights Reserved
+
+</div>
+<script>
+
+/* Sidebar */
+
+function toggleSidebar(){
+
+document
+.getElementById("sidebar")
+.classList
+.toggle("active");
+
+}
+
+/* Speech To Text */
+
+function startVoice(){
+
+const SpeechRecognition =
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+if(!SpeechRecognition){
+
+alert(
+"Speech Recognition not supported on this browser."
+);
+
+return;
+
+}
+
+const recognition =
+new SpeechRecognition();
+
+recognition.lang = "en-US";
+
+recognition.start();
+
+recognition.onresult =
+function(event){
+
+document
+.getElementById("userInput")
+.value =
+event.results[0][0].transcript;
+
+};
+
+}
+
+/* Send Message */
+
+async function send(){
+
+let input =
+document.getElementById("userInput");
+
+if(!input.value.trim()) return;
+
+/* Hero Hide */
+
+document
+.getElementById("hero")
+.style.display = "none";
+
+/* Chat Show */
+
+document
+.getElementById("chat-window")
+.style.display = "block";
+
+let chat =
+document.getElementById("chat-window");
+
+/* User Message */
+
+chat.innerHTML += `
+
+<div class="message user">
+
+<div class="bubble">
+
+${input.value}
+
+</div>
+
+</div>
+
+`;
+
+let text = input.value;
+
+input.value = "";
+
+/* Typing */
+
+document
+.getElementById("typing")
+.style.display = "block";
+
+try{
+
+let response =
+await fetch("/chat",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+message:text
+})
+
+});
+
+let data =
+await response.json();
+
+/* Hide Typing */
+
+document
+.getElementById("typing")
+.style.display = "none";
+
+/* AI Message */
+
+chat.innerHTML += `
+
+<div class="message ai">
+
+<div class="bubble">
+
+<img
+src="/logo.png"
+class="ai-logo"
+>
+
+<div>
+
+${data.reply}
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}catch(e){
+
+document
+.getElementById("typing")
+.style.display = "none";
+
+chat.innerHTML += `
+
+<div class="message ai">
+
+<div class="bubble">
+
+<img
+src="/logo.png"
+class="ai-logo"
+>
+
+<div>
+
+Connection Error
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+/* Auto Scroll */
+
+chat.scrollTop =
+chat.scrollHeight;
+
+}
+
+/* Enter Key */
+
+document
+.getElementById("userInput")
+.addEventListener(
+"keypress",
+function(e){
+
+if(e.key === "Enter"){
+
+send();
+
+}
+
+}
+);
+
+</script>
+
+</body>
 </html>
