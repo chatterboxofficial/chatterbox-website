@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatterbox AI V5</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<div id="sidebar" class="sidebar">
+<h2>Chatterbox AI</h2>
+<p>Your next breakthrough starts here.</p>
+<hr>
+<button>New Chat</button>
+<button onclick="clearChat()">Clear Chat</button>
+<button>Voice Settings</button>
+<button>Memory Status</button>
+<button>About</button>
+<div class="copyright">© 2026 Chatterbox AI</div>
+</div>
+
+<div id="welcome" class="hero">
+<div class="logo">C</div>
+<h1>Chatterbox AI</h1>
+<h3>Your next breakthrough starts here.</h3>
+<p>Think deeper • Create faster • Explore further</p>
+</div>
+
+<div id="chat-window" class="chat-window"></div>
+
+<div id="typing" class="typing">Thinking...</div>
+
+<div class="input-bar">
+<textarea id="userInput" placeholder="Message Chatterbox AI..."></textarea>
+<button onclick="send()">➜</button>
+</div>
+
+<script>
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('active');}
+function clearChat(){document.getElementById('chat-window').innerHTML='';}
+
+async function send(){
+let input=document.getElementById('userInput');
+if(!input.value.trim()) return;
+document.getElementById('welcome')?.remove();
+let chat=document.getElementById('chat-window');
+chat.innerHTML+=`<div class="user msg">${input.value}</div>`;
+let text=input.value; input.value='';
+document.getElementById('typing').style.display='block';
+try{
+let r=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
+let d=await r.json();
+chat.innerHTML+=`<div class="ai msg">${d.reply}</div>`;
+}catch(e){
+chat.innerHTML+=`<div class="ai msg">Connection Error</div>`;
+}
+document.getElementById('typing').style.display='none';
+chat.scrollTop=chat.scrollHeight;
+}
+</script>
+</body>
+</html>
