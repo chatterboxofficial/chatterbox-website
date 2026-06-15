@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import os
 import requests
 
-app = Flask(**name**)
+app = Flask(__name__)
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
@@ -56,5 +56,6 @@ except Exception as e:
     return jsonify({"reply": f"Error: {str(e)}"})
 ```
 
-if **name** == "**main**":
-app.run(host="0.0.0.0", port=5000)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
