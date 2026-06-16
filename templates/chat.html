@@ -1,64 +1,658 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chatterbox AI V5</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatterbox AI — Your AI Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
-<button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
-<div id="sidebar" class="sidebar">
-<h2>Chatterbox AI</h2>
-<p>Your next breakthrough starts here.</p>
-<hr>
-<button>New Chat</button>
-<button onclick="clearChat()">Clear Chat</button>
-<button>Voice Settings</button>
-<button>Memory Status</button>
-<button>About</button>
-<div class="copyright">© 2026 Chatterbox AI</div>
-</div>
+    <!-- ====== LOGIN / AUTH OVERLAY ====== -->
+    <div id="authOverlay" class="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Chatterbox AI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <div class="auth-logo-fallback" style="display:none;width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);align-items:center;justify-content:center;font-size:40px;font-weight:800;color:#fff;">C</div>
+            </div>
+            <h1>Welcome to <span class="gradient-text">Chatterbox AI</span></h1>
+            <p class="auth-subtitle">Your intelligent assistant powered by Groq</p>
+            <div class="auth-buttons">
+                <button onclick="authWithGoogle()" class="auth-btn google-btn">
+                    <i class="fab fa-google"></i> Continue with Google
+                </button>
+                <button onclick="authAsGuest()" class="auth-btn guest-btn">
+                    <i class="fas fa-user"></i> Continue as Guest
+                </button>
+            </div>
+            <p class="auth-footer">By continuing, you agree to our Terms & Privacy Policy</p>
+        </div>
+    </div>
 
-<div id="welcome" class="hero">
-<div class="logo">C</div>
-<h1>Chatterbox AI</h1>
-<h3>Your next breakthrough starts here.</h3>
-<p>Think deeper • Create faster • Explore further</p>
-</div>
+    <!-- ====== SIDEBAR ====== -->
+    <div id="sidebar" class="sidebar">
+        <button class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        
+        <div class="sidebar-brand">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Chatterbox AI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+            <div class="sidebar-brand-fallback" style="display:none;width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;">C</div>
+            <div>
+                <span class="brand-name">Chatterbox AI</span>
+                <span class="brand-tag">v2.0</span>
+            </div>
+        </div>
 
-<div id="chat-window" class="chat-window"></div>
+        <div class="sidebar-user">
+            <i class="fas fa-user-circle"></i>
+            <span id="userNameDisplay">Guest</span>
+        </div>
 
-<div id="typing" class="typing">Thinking...</div>
+        <hr class="sidebar-divider" />
 
-<div class="input-bar">
-<textarea id="userInput" placeholder="Message Chatterbox AI..."></textarea>
-<button onclick="send()">➜</button>
-</div>
+        <nav class="sidebar-nav">
+            <button onclick="newChat()" class="nav-btn primary">
+                <i class="fas fa-plus-circle"></i> New Chat
+            </button>
+            <button onclick="clearChat()" class="nav-btn">
+                <i class="fas fa-trash-alt"></i> Clear Chat
+            </button>
+            <button onclick="toggleVoice()" class="nav-btn">
+                <i class="fas fa-microphone"></i> Voice Settings
+            </button>
+            <button onclick="showMemory()" class="nav-btn">
+                <i class="fas fa-brain"></i> Memory Status
+            </button>
+            <button onclick="showAbout()" class="nav-btn">
+                <i class="fas fa-info-circle"></i> About
+            </button>
+        </nav>
 
-<script>
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('active');}
-function clearChat(){document.getElementById('chat-window').innerHTML='';}
+        <div class="sidebar-bottom">
+            <div class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="themeIcon"></i>
+                <span id="themeLabel">Dark</span>
+            </div>
+            <div class="sidebar-powered">
+                Powered by <span class="gradient-text">Chatterbox AI</span>
+            </div>
+            <div class="sidebar-copyright">
+                © 2026 Chatterbox AI. All Rights Reserved.<br />
+                Crafted with ❤️ by <span class="gradient-text">Aniket</span>
+            </div>
+        </div>
+    </div>
 
-async function send(){
-let input=document.getElementById('userInput');
-if(!input.value.trim()) return;
-document.getElementById('welcome')?.remove();
-let chat=document.getElementById('chat-window');
-chat.innerHTML+=`<div class="user msg">${input.value}</div>`;
-let text=input.value; input.value='';
-document.getElementById('typing').style.display='block';
-try{
-let r=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
-let d=await r.json();
-chat.innerHTML+=`<div class="ai msg">${d.reply}</div>`;
-}catch(e){
-chat.innerHTML+=`<div class="ai msg">Connection Error</div>`;
-}
-document.getElementById('typing').style.display='none';
-chat.scrollTop=chat.scrollHeight;
-}
-</script>
+    <!-- ====== MENU TOGGLE ====== -->
+    <button class="menu-btn" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- ====== MAIN CHAT AREA ====== -->
+    <div class="main-container">
+        
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="status-dot"></div>
+                <span class="header-title">Chatterbox AI</span>
+                <span class="header-mode" id="currentModeLabel">💬 General</span>
+            </div>
+            <div class="header-right">
+                <span class="header-status">● Online</span>
+            </div>
+        </div>
+
+        <!-- Welcome / Hero -->
+        <div id="welcome" class="hero-section">
+            <div class="hero-logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Chatterbox AI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <div class="hero-logo-fallback" style="display:none;width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);align-items:center;justify-content:center;font-size:48px;font-weight:800;color:#fff;">C</div>
+            </div>
+            <h1>Chatterbox AI</h1>
+            <p class="hero-tagline">Your next breakthrough starts here.</p>
+            <p class="hero-sub">Think deeper • Create faster • Explore further</p>
+            <div class="hero-modes">
+                <span>💬 General</span>
+                <span>🎓 Student</span>
+                <span>🔍 Research</span>
+                <span>🧠 Thinking</span>
+                <span>💻 Coding</span>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chatWindow" class="chat-window"></div>
+
+        <!-- Typing Indicator -->
+        <div id="typingIndicator" class="typing-indicator">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="typing-text">Thinking...</span>
+        </div>
+
+        <!-- ====== INPUT BAR ====== -->
+        <div class="input-bar">
+            <button class="input-btn" onclick="document.getElementById('imageInput').click()" title="Upload Image">
+                <i class="fas fa-camera"></i>
+            </button>
+            <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(this)" />
+            
+            <button class="input-btn" onclick="document.getElementById('fileInput').click()" title="Upload File">
+                <i class="fas fa-paperclip"></i>
+            </button>
+            <input type="file" id="fileInput" accept=".pdf,.txt" style="display:none" onchange="handleFileUpload(this)" />
+            
+            <button class="input-btn" onclick="openImageGenerator()" title="Generate Image">
+                <i class="fas fa-paint-brush"></i>
+            </button>
+            
+            <input type="text" id="userInput" placeholder="Message Chatterbox AI..." autocomplete="off" />
+            
+            <button class="input-btn" onclick="startVoice()" id="voiceBtn" title="Voice Input">
+                <i class="fas fa-microphone"></i>
+            </button>
+            
+            <button class="send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ====== IMAGE GENERATOR MODAL ====== -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeImageGenerator()"><i class="fas fa-times"></i></button>
+            <h2><i class="fas fa-paint-brush" style="color:#ec4899"></i> Generate Image</h2>
+            <p class="modal-sub">Describe what you want to create</p>
+            <input type="text" id="imagePrompt" placeholder="e.g. A futuristic city at sunset..." />
+            <button onclick="generateImage()" class="generate-btn">
+                <i class="fas fa-wand-magic-sparkles"></i> Generate
+            </button>
+            <div id="imageResult" class="image-result hidden">
+                <img id="generatedImage" alt="Generated Image" />
+                <button onclick="downloadImage()" class="download-btn">
+                    <i class="fas fa-download"></i> Download
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== MODE SELECTOR (Mobile Bottom Sheet) ====== -->
+    <div id="modeSheet" class="mode-sheet">
+        <div class="mode-sheet-header">
+            <span>Select Mode</span>
+            <button onclick="closeModeSheet()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="mode-sheet-grid" id="modeSheetGrid">
+            <!-- Modes injected by JS -->
+        </div>
+    </div>
+    <div id="modeOverlay" class="mode-overlay" onclick="closeModeSheet()"></div>
+
+    <!-- ====== MODE BUTTON (Mobile) ====== -->
+    <button class="mode-toggle-mobile" onclick="openModeSheet()">
+        <i class="fas fa-cog"></i>
+    </button>
+
+
+    <!-- ========================================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================================== -->
+    <script>
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentMode = 'general';
+        let isAuthenticated = false;
+        let userName = 'Guest';
+        let currentImageUrl = '';
+        let isDarkTheme = true;
+        let isVoiceListening = false;
+        let recognition = null;
+
+        const modes = [
+            { id: 'general', icon: '💬', name: 'General Chat', desc: 'General AI assistant' },
+            { id: 'student', icon: '🎓', name: 'Student Mode', desc: 'Homework & quizzes' },
+            { id: 'research', icon: '🔍', name: 'Deep Research', desc: 'In-depth analysis' },
+            { id: 'thinking', icon: '🧠', name: 'Thinking Mode', desc: 'Step-by-step reasoning' },
+            { id: 'creator', icon: '🎨', name: 'Creator Mode', desc: 'Content & social media' },
+            { id: 'coding', icon: '💻', name: 'Coding Mode', desc: 'Code help & debugging' },
+            { id: 'personal', icon: '🌟', name: 'Personal Assistant', desc: 'Life planning & advice' },
+        ];
+
+        // ============================================================
+        // AUTHENTICATION
+        // ============================================================
+        function authWithGoogle() {
+            // In production, implement OAuth
+            isAuthenticated = true;
+            userName = 'User';
+            document.getElementById('userNameDisplay').textContent = userName;
+            document.getElementById('authOverlay').style.display = 'none';
+            showToast('Welcome to Chatterbox AI! 🎉');
+        }
+
+        function authAsGuest() {
+            isAuthenticated = true;
+            userName = 'Guest';
+            document.getElementById('userNameDisplay').textContent = userName;
+            document.getElementById('authOverlay').style.display = 'none';
+            showToast('Welcome, Guest! 🎉');
+        }
+
+        // ============================================================
+        // THEME TOGGLE
+        // ============================================================
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('light-theme');
+            const icon = document.getElementById('themeIcon');
+            const label = document.getElementById('themeLabel');
+            if (isDarkTheme) {
+                icon.className = 'fas fa-moon';
+                label.textContent = 'Dark';
+            } else {
+                icon.className = 'fas fa-sun';
+                label.textContent = 'Light';
+            }
+            localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
+        }
+
+        // ============================================================
+        // SIDEBAR
+        // ============================================================
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function newChat() {
+            document.getElementById('chatWindow').innerHTML = '';
+            document.getElementById('welcome').style.display = 'block';
+            showToast('✨ New chat started!');
+            toggleSidebar();
+        }
+
+        async function clearChat() {
+            if (!confirm('Clear all messages?')) return;
+            try {
+                await fetch('/clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: currentMode })
+                });
+                document.getElementById('chatWindow').innerHTML = '';
+                document.getElementById('welcome').style.display = 'block';
+                showToast('🗑️ Chat cleared!');
+            } catch (e) {
+                showToast('❌ Error clearing chat');
+            }
+            toggleSidebar();
+        }
+
+        function toggleVoice() {
+            showToast('🎤 Voice settings coming soon!');
+            toggleSidebar();
+        }
+
+        function showMemory() {
+            showToast('🧠 Memory: Active (conversation context saved)');
+            toggleSidebar();
+        }
+
+        function showAbout() {
+            showToast('🤖 Chatterbox AI v2.0 — Powered by Groq. Crafted by Aniket.');
+            toggleSidebar();
+        }
+
+        // ============================================================
+        // MODE SELECTOR
+        // ============================================================
+        function openModeSheet() {
+            const grid = document.getElementById('modeSheetGrid');
+            grid.innerHTML = modes.map(m => `
+                <div onclick="switchMode('${m.id}')" class="mode-sheet-item">
+                    <span class="mode-sheet-icon">${m.icon}</span>
+                    <span class="mode-sheet-name">${m.name}</span>
+                </div>
+            `).join('');
+            document.getElementById('modeSheet').classList.add('active');
+            document.getElementById('modeOverlay').classList.add('active');
+        }
+
+        function closeModeSheet() {
+            document.getElementById('modeSheet').classList.remove('active');
+            document.getElementById('modeOverlay').classList.remove('active');
+        }
+
+        function switchMode(modeId) {
+            currentMode = modeId;
+            const mode = modes.find(m => m.id === modeId);
+            document.getElementById('currentModeLabel').textContent = mode ? `${mode.icon} ${mode.name}` : '💬 General';
+            closeModeSheet();
+            showToast(`🔄 Switched to ${mode?.name || 'General Chat'} mode`);
+            // Add system message
+            addMessage('system', `🔄 Switched to ${mode?.name || 'General Chat'} mode`);
+        }
+
+        // ============================================================
+        // ADD MESSAGE
+        // ============================================================
+        function addMessage(type, content, isHTML = false) {
+            const container = document.getElementById('chatWindow');
+            const welcome = document.getElementById('welcome');
+            if (welcome) welcome.style.display = 'none';
+            
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            
+            if (type === 'user') {
+                div.innerHTML = `
+                    <div class="message-content user-bubble">
+                        ${escapeHtml(content)}
+                    </div>
+                    <div class="message-avatar user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                `;
+            } else if (type === 'system') {
+                div.className = 'message system';
+                div.innerHTML = `<div class="system-text">${content}</div>`;
+            } else {
+                div.innerHTML = `
+                    <div class="message-avatar ai-avatar">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="Chatterbox" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                        <div style="display:none;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;">C</div>
+                    </div>
+                    <div class="message-content ai-bubble ${isHTML ? 'html-content' : ''}">
+                        ${isHTML ? content : escapeHtml(content)}
+                    </div>
+                `;
+            }
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============================================================
+        // SEND MESSAGE
+        // ============================================================
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            input.value = '';
+            addMessage('user', message);
+            showTyping(true);
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, mode: currentMode })
+                });
+                const data = await response.json();
+                showTyping(false);
+                if (data.reply) {
+                    addMessage('ai', data.reply);
+                } else {
+                    addMessage('ai', '⚠️ Something went wrong. Please try again.');
+                }
+            } catch (error) {
+                showTyping(false);
+                addMessage('ai', '❌ Network error. Please check your connection.');
+            }
+        }
+
+        // ============================================================
+        // TYPING INDICATOR
+        // ============================================================
+        function showTyping(show) {
+            document.getElementById('typingIndicator').style.display = show ? 'flex' : 'none';
+            if (show) {
+                document.getElementById('chatWindow').scrollTop = document.getElementById('chatWindow').scrollHeight;
+            }
+        }
+
+        // ============================================================
+        // IMAGE UPLOAD (Snap & Solve)
+        // ============================================================
+        async function handleImageUpload(input) {
+            if (!input.files.length) return;
+            const file = input.files[0];
+            showToast(`📷 Uploading: ${file.name}`);
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('mode', currentMode);
+            formData.append('message', 'Solve this question or describe what you see.');
+            
+            try {
+                const response = await fetch('/chat/image', { method: 'POST', body: formData });
+                const data = await response.json();
+                if (data.reply) {
+                    addMessage('user', `📷 [Image: ${file.name}]`);
+                    addMessage('ai', data.reply);
+                }
+                showToast('✅ Image processed!');
+            } catch (error) {
+                showToast('❌ Upload failed');
+            }
+            input.value = '';
+        }
+
+        // ============================================================
+        // FILE UPLOAD (PDF/TXT)
+        // ============================================================
+        async function handleFileUpload(input) {
+            if (!input.files.length) return;
+            const file = input.files[0];
+            showToast(`📎 Uploading: ${file.name}`);
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('mode', currentMode);
+            formData.append('message', 'Summarize this file and give key points.');
+            
+            try {
+                const response = await fetch('/chat/file', { method: 'POST', body: formData });
+                const data = await response.json();
+                if (data.reply) {
+                    addMessage('user', `📎 [File: ${file.name}]`);
+                    addMessage('ai', data.reply);
+                }
+                showToast('✅ File processed!');
+            } catch (error) {
+                showToast('❌ Upload failed');
+            }
+            input.value = '';
+        }
+
+        // ============================================================
+        // VOICE INPUT
+        // ============================================================
+        function startVoice() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showToast('❌ Voice input not supported in this browser');
+                return;
+            }
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            
+            const voiceBtn = document.getElementById('voiceBtn');
+            
+            recognition.onstart = function() {
+                isVoiceListening = true;
+                voiceBtn.style.color = '#ec4899';
+                voiceBtn.style.background = 'rgba(236,72,153,0.2)';
+                showToast('🎤 Listening...');
+            };
+            
+            recognition.onresult = function(event) {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById('userInput').value = transcript;
+            };
+            
+            recognition.onend = function() {
+                isVoiceListening = false;
+                voiceBtn.style.color = '';
+                voiceBtn.style.background = '';
+                showToast('✅ Voice captured!');
+            };
+            
+            recognition.onerror = function(event) {
+                isVoiceListening = false;
+                voiceBtn.style.color = '';
+                voiceBtn.style.background = '';
+                showToast('❌ Voice error: ' + event.error);
+            };
+            
+            recognition.start();
+        }
+
+        // ============================================================
+        // IMAGE GENERATOR
+        // ============================================================
+        function openImageGenerator() {
+            document.getElementById('imageModal').style.display = 'flex';
+            document.getElementById('imagePrompt').focus();
+        }
+
+        function closeImageGenerator() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.getElementById('imageResult').classList.add('hidden');
+        }
+
+        async function generateImage() {
+            const prompt = document.getElementById('imagePrompt').value.trim();
+            if (!prompt) {
+                showToast('⚠️ Please enter a prompt');
+                return;
+            }
+            
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/image/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await response.json();
+                
+                if (data.image_url) {
+                    currentImageUrl = data.image_url;
+                    document.getElementById('generatedImage').src = data.image_url;
+                    document.getElementById('imageResult').classList.remove('hidden');
+                    addMessage('user', `🎨 Generate image: "${prompt}"`);
+                    addMessage('ai', `<img src="${data.image_url}" class="generated-image" alt="Generated Image" />`, true);
+                    showToast('✅ Image generated!');
+                } else {
+                    showToast('❌ Failed to generate image');
+                }
+            } catch (error) {
+                showToast('❌ Error generating image');
+            }
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        function downloadImage() {
+            if (currentImageUrl) {
+                window.open(currentImageUrl, '_blank');
+            }
+        }
+
+        // ============================================================
+        // TOAST NOTIFICATIONS
+        // ============================================================
+        function showToast(message) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            const input = document.getElementById('userInput');
+            if (e.key === 'Enter' && !e.shiftKey && document.activeElement === input) {
+                e.preventDefault();
+                sendMessage();
+            }
+            if (e.key === 'Escape') {
+                closeImageGenerator();
+                closeModeSheet();
+            }
+            if (e.key === '/' && document.activeElement !== input) {
+                e.preventDefault();
+                input.focus();
+            }
+        });
+
+        // ============================================================
+        // LOAD SAVED THEME
+        // ============================================================
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            isDarkTheme = false;
+            document.body.classList.add('light-theme');
+            document.getElementById('themeIcon').className = 'fas fa-sun';
+            document.getElementById('themeLabel').textContent = 'Light';
+        }
+
+        // ============================================================
+        // CLICK OUTSIDE SIDEBAR TO CLOSE
+        // ============================================================
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.querySelector('.menu-btn');
+            if (sidebar.classList.contains('active') && 
+                !sidebar.contains(e.target) && 
+                !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        console.log('🤖 Chatterbox AI v2.0 loaded!');
+        console.log('💡 Tip: Press "/" to focus input');
+    </script>
 </body>
 </html>
