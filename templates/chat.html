@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chatterbox AI</title>
+  <link rel="icon" type="image/png" href="/static/logo.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <style>
@@ -79,6 +80,7 @@
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
     }
 
@@ -123,6 +125,23 @@
       color: var(--text-muted);
       letter-spacing: 0.5px;
     }
+
+    .sidebar-close-btn {
+      display: none;
+      width: 30px;
+      height: 30px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .sidebar-close-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 
     .new-chat-btn {
       margin: 14px 14px 8px;
@@ -207,6 +226,7 @@
       flex-direction: column;
       overflow: hidden;
       background: var(--bg-primary);
+      min-height: 0;
     }
 
     /* ── TOP BAR ── */
@@ -267,6 +287,7 @@
       flex-direction: column;
       gap: 16px;
       scroll-behavior: smooth;
+      min-height: 0;
     }
 
     .chat-area::-webkit-scrollbar { width: 4px; }
@@ -454,7 +475,7 @@
 
     /* ── INPUT AREA ── */
     .input-wrap {
-      padding: 14px 20px 10px;
+      padding: 10px 20px 8px;
       background: var(--bg-secondary);
       border-top: 1px solid var(--border);
       flex-shrink: 0;
@@ -490,7 +511,7 @@
       background: var(--bg-input);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 6px 8px 6px 12px;
+      padding: 4px 6px 4px 10px;
       transition: border-color 0.2s;
     }
     .input-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
@@ -499,12 +520,12 @@
     .input-actions-left { display: flex; gap: 4px; align-items: center; }
 
     .input-icon-btn {
-      width: 32px; height: 32px;
+      width: 30px; height: 30px;
       background: none;
       border: none;
       border-radius: 8px;
       color: var(--text-muted);
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.2s;
@@ -520,10 +541,10 @@
       font-family: 'Inter', sans-serif;
       font-size: 14px;
       color: var(--text-primary);
-      line-height: 1.5;
-      max-height: 140px;
-      min-height: 24px;
-      padding: 4px 0;
+      line-height: 1.4;
+      max-height: 110px;
+      min-height: 20px;
+      padding: 6px 0;
     }
     textarea::placeholder { color: var(--text-muted); }
 
@@ -531,12 +552,12 @@
 
     /* Mic button */
     .mic-btn {
-      width: 34px; height: 34px;
+      width: 32px; height: 32px;
       background: var(--bg-hover);
       border: 1px solid var(--border);
       border-radius: 9px;
       color: var(--text-secondary);
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.2s;
@@ -547,12 +568,12 @@
 
     /* Send button */
     .send-btn {
-      width: 34px; height: 34px;
+      width: 32px; height: 32px;
       background: linear-gradient(135deg, #6c63ff, #a78bfa);
       border: none;
       border-radius: 9px;
       color: #fff;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.2s;
@@ -601,7 +622,7 @@
       text-align: center;
       font-size: 10px;
       color: var(--text-muted);
-      margin-top: 8px;
+      margin-top: 6px;
       letter-spacing: 0.2px;
     }
 
@@ -674,6 +695,7 @@
     }
 
     @media (max-width: 700px) {
+      html, body { height: 100dvh; }
       .sidebar {
         position: fixed;
         left: 0; top: 0; bottom: 0;
@@ -683,6 +705,7 @@
       .sidebar.open { transform: translateX(0); }
       .sidebar-overlay.show { display: block; }
       .hamburger { display: flex; }
+      .sidebar-close-btn { display: flex; }
       .bubble { max-width: 88%; }
     }
 
@@ -726,6 +749,9 @@
         <span>by Aniket</span>
       </div>
     </div>
+    <button class="sidebar-close-btn" onclick="closeSidebar()" aria-label="Close menu">
+      <i class="fa fa-times"></i>
+    </button>
   </div>
 
   <button class="new-chat-btn" onclick="newChat()">
@@ -948,7 +974,7 @@
   // ── AUTO RESIZE TEXTAREA ──
   function autoResize(el) {
     el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+    el.style.height = Math.min(el.scrollHeight, 110) + 'px';
   }
 
   // ── ENTER TO SEND ──
